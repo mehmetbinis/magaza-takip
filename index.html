@@ -1,0 +1,110 @@
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Heribom Mağaza Takip</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f9f9f9; }
+        h1 { text-align: center; color: #333; }
+        .logo { font-size: 24px; font-weight: bold; text-align: center; margin-bottom: 20px; color: #ff6600; }
+        .btn { padding: 10px 15px; background: #ff6600; color: #fff; border: none; cursor: pointer; border-radius: 5px; }
+        .btn:hover { background: #e65c00; }
+        .store { background: #fff; padding: 10px; margin: 10px 0; border-radius: 5px; box-shadow: 0 0 5px rgba(0,0,0,0.1); }
+        .store-buttons { margin-top: 10px; }
+        .panel { display: none; margin-top: 10px; background: #f1f1f1; padding: 10px; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="logo">Heribom</div>
+    <h1>Mağaza Takip Sistemi</h1>
+
+    <div>
+        <input type="text" id="storeName" placeholder="Mağaza Adı">
+        <button class="btn" onclick="addStore()">Mağaza Ekle</button>
+    </div>
+
+    <div id="storeList"></div>
+
+    <script>
+        let stores = [];
+
+        function addStore() {
+            const name = document.getElementById('storeName').value.trim();
+            if (!name) return alert("Mağaza adı giriniz.");
+            stores.push({name, products: [], info: ''});
+            document.getElementById('storeName').value = '';
+            renderStores();
+        }
+
+        function renderStores() {
+            const list = document.getElementById('storeList');
+            list.innerHTML = '';
+            stores.forEach((store, index) => {
+                const div = document.createElement('div');
+                div.className = 'store';
+                div.innerHTML = `
+                    <strong>${store.name}</strong>
+                    <div class="store-buttons">
+                        <button class="btn" onclick="togglePanel(${index}, 'product')">Ürün Ekle</button>
+                        <button class="btn" onclick="togglePanel(${index}, 'info')">Bilgiler</button>
+                        <button class="btn" onclick="togglePanel(${index}, 'edit')">Düzenle</button>
+                    </div>
+                    <div id="panel-${index}-product" class="panel">
+                        <input type="text" placeholder="Ürün Adı" id="prodName-${index}">
+                        <input type="number" placeholder="Adet" id="prodQty-${index}">
+                        <button class="btn" onclick="addProduct(${index})">Ekle</button>
+                        <ul id="prodList-${index}"></ul>
+                    </div>
+                    <div id="panel-${index}-info" class="panel">
+                        <textarea id="infoText-${index}" placeholder="Mağaza bilgileri...">${store.info || ''}</textarea>
+                        <button class="btn" onclick="saveInfo(${index})">Kaydet</button>
+                    </div>
+                    <div id="panel-${index}-edit" class="panel">
+                        <input type="text" id="editName-${index}" value="${store.name}">
+                        <button class="btn" onclick="saveEdit(${index})">Kaydet</button>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        function togglePanel(index, type) {
+            ['product', 'info', 'edit'].forEach(t => {
+                const p = document.getElementById(`panel-${index}-${t}`);
+                if (p) p.style.display = (t === type && p.style.display !== 'block') ? 'block' : 'none';
+            });
+        }
+
+        function addProduct(index) {
+            const name = document.getElementById(`prodName-${index}`).value.trim();
+            const qty = parseInt(document.getElementById(`prodQty-${index}`).value);
+            if (!name || !qty) return alert("Ürün adı ve adet giriniz.");
+            stores[index].products.push({name, qty});
+            document.getElementById(`prodName-${index}`).value = '';
+            document.getElementById(`prodQty-${index}`).value = '';
+            renderProducts(index);
+        }
+
+        function renderProducts(index) {
+            const ul = document.getElementById(`prodList-${index}`);
+            ul.innerHTML = '';
+            stores[index].products.forEach(p => {
+                const li = document.createElement('li');
+                li.textContent = `${p.name} - ${p.qty} adet`;
+                ul.appendChild(li);
+            });
+        }
+
+        function saveInfo(index) {
+            stores[index].info = document.getElementById(`infoText-${index}`).value;
+            alert("Bilgiler kaydedildi.");
+        }
+
+        function saveEdit(index) {
+            stores[index].name = document.getElementById(`editName-${index}`).value;
+            renderStores();
+        }
+    </script>
+</body>
+</html>
